@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue - django formset app</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.5.1/css/pikaday.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.5.1/pikaday.js"></script>
+    <script src="{% static 'vue_formset/vue.js' %}"></script>
+</head>
+<body>
+    <div id="app">
+        <div v-for="person in activePersons"
+             :key="person.id">
+            <button @click="del(person)">X</button>
+            <input type="hidden" :value="person.id">
+            <span v-if="person.id">id: {$ person.id $}</span>
+            <span v-else style="padding : 20px;">{$ person.id $}</span>
+            <input type="text" v-model="person.name">
+            <input type="number" v-model="person.age">
+            <input type="checkbox" v-model="person.is_active">
+            <datepicker :value="person.birthday"
+                        @input="person.birthday = arguments[0]">
+            </datepicker>
+        </div>
+
+        <div>
+            <span style="padding: 35px"></span>
+            <input type="hidden" name="status" :value="person.status">
+            <input type="text" v-model="person.name">
+            <input type="number" v-model="person.age">
+            <input type="checkbox" v-model="person.is_active">
+            <datepicker v-model="person.birthday"
+                        @input="person.birthday = arguments[0]">
+            </datepicker>
+            <button @click="add($event)">add</button>
+        </div>
+
+        <div>
+            <button @click="save">save</button>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        var defaults = {
+            id: null,
+            name: 'name',
+            age: 20,
+            is_active: true,
+            birthday: '2000-01-01',
+            status: null
+        };
+        var datepicker = Vue.component('datepicker', {
+            template: '<input type="text" :value="value"/>',
+            props: ['value'],
+            mounted: function () {
+                var vm = this;
+                new Pikaday({
+                    field: this.$el,
+                    onSelect: function (date) {
+                        vm.$emit('input', moment(date).format('YYYY-MM-DD'));
+                    }
+                });
+            }
+        });
+        new Vue({
+            el: '#app',
+            delimiters: ['{$', '$}'],
+            data: {
+                person: Object.assign({}, defaults),
+                persons: []
+            },
+            computed: {
+                activePersons: function () {
+                    return this.persons.filter(function (p) {
+                        if (p.status !== 'delete') return p
+                    });
+                }
+            },
+            components: {'datepicker': datepicker},
+            methods: {
+                add: function () {
+                    this.persons.push(Object.assign({}, this.person));
+                    this.person = Object.assign({}, defaults);
+                },
+                del: function (person) {
+                    person.status = 'delete';
+                },
+                save: function () {
+                    var vm = this;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/update_persons',
+                        data: JSON.stringify(vm.persons)
+                    }).then(function () {
+                        location.reload()
+                    }).catch(function (response) {
+                        console.warn(response)
+                    })
+                }
+            },
+            created: function () {
+                var vm = this;
+                $.ajax({
+                    url: '/api/get_persons'
+                }).then(function (response) {
+                    vm.persons = response.results;
+                }).catch(function (response) {
+                    console.warn(response);
+                })
+            }
+        });
+    </script>
+
+</body>
+</html>
