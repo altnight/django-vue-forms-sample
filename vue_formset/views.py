@@ -29,7 +29,7 @@ def get_persons(request):
 
 @csrf_exempt
 def update_persons(request):
-    content = json.loads(request.body)
+    content = json.loads(request.body.decode("utf-8"))
 
     for row in content:
 
