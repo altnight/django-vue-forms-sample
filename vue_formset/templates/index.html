@@ -14,22 +14,12 @@
 </head>
 <body>
     <div id="app">
-        <div v-for="person in activePersons"
-             :key="person.id">
-            <button @click="del(person)">X</button>
-            <input type="hidden" :value="person.id">
-            <span v-if="person.id">id: {$ person.id $}</span>
-            <span v-else style="padding : 20px;">{$ person.id $}</span>
-            <input type="text" v-model="person.name">
-            <input type="number" v-model="person.age">
-            <input type="checkbox" v-model="person.is_active">
-            <datepicker :value="person.birthday"
-                        @input="person.birthday = arguments[0]">
-            </datepicker>
-        </div>
-
         <div>
-            <span style="padding: 35px"></span>
+            <button @click="save">save</button>
+        </div>
+        <div>
+            <span class="row"></span>
+            <span class="row"></span>
             <input type="hidden" name="status" :value="person.status">
             <input type="text" v-model="person.name">
             <input type="number" v-model="person.age">
@@ -40,11 +30,28 @@
             <button @click="add($event)">add</button>
         </div>
 
-        <div>
-            <button @click="save">save</button>
+        <div v-for="person in activePersons"
+             :key="person.id">
+            <button @click="del(person)" class="row">X</button>
+            <input type="hidden" :value="person.id">
+            <span v-if="person.id" class="row">id: {$ person.id $}</span>
+            <span v-else class="row">{$ person.id $}</span>
+            <input type="text" v-model="person.name">
+            <input type="number" v-model="person.age">
+            <input type="checkbox" v-model="person.is_active">
+            <datepicker :value="person.birthday"
+                        @input="person.birthday = arguments[0]">
+            </datepicker>
         </div>
 
     </div>
+
+    <style type="text/css">
+        .row {
+            width: 60px;
+            display: inline-block;
+        }
+    </style>
 
     <script type="text/javascript">
         var defaults = {
