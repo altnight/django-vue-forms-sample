@@ -38,9 +38,10 @@ def update_persons(request):
             continue
 
         id = form.cleaned_data["id"]
+        status = form.cleaned_data.get("status")
         if id is not None:
             person = models.Person.objects.get(id=form.cleaned_data["id"])
-            if form.cleaned_data.get("status") == 'delete':
+            if status == 'delete':
                 # delete
                 person.delete()
             else:
@@ -50,7 +51,7 @@ def update_persons(request):
                 person.is_active = form.cleaned_data["is_active"]
                 person.birthday = form.cleaned_data["birthday"]
                 person.save()
-        else:
+        elif status != 'delete':
             # add
             models.Person.objects.create(
                 name=form.cleaned_data["name"],
